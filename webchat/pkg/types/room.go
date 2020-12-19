@@ -2,6 +2,7 @@ package types
 
 import (
 	"github.com/gorilla/websocket"
+	"github/gitalek/go_sandbox_apps/trace/pkg/trace"
 	"log"
 	"net/http"
 )
@@ -19,6 +20,9 @@ type Room struct {
 	leave chan *client
 	// clients holds all current clients in this room.
 	clients map[*client]bool
+	// tracer will receive trace information of activity
+	// in the room
+	Tracer trace.Tracer
 }
 
 func NewRoom() *Room {
@@ -27,6 +31,7 @@ func NewRoom() *Room {
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
+		Tracer: trace.Off(),
 	}
 }
 
@@ -36,14 +41,17 @@ func (r *Room) Run() {
 		case client := <-r.join:
 			// joining
 			r.clients[client] = true
+			r.Tracer.Trace("New client joined")
 		case client := <-r.leave:
 			// leaving
 			delete(r.clients, client)
 			close(client.send)
+			r.Tracer.Trace("Client left")
 		case msg := <-r.forward:
 			// forward messages to all clients
 			for client := range r.clients {
 				client.send <- msg
+				r.Tracer.Trace("-- sent to client")
 			}
 		}
 	}

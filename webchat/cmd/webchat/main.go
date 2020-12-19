@@ -40,6 +40,7 @@ func main() {
 	flag.Parse()
 	//addr := fmt.Sprintf("%s:%d", host, port)
 	r := types.NewRoom()
+	//r.Tracer = trace.New(os.Stdout)
 
 	// root
 	http.Handle("/", &templateHandler{templDir: templDir, filename: "chat.html"})

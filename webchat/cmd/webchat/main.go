@@ -46,8 +46,8 @@ func main() {
 
 	// joining the room
 	http.Handle("/room", r)
-
 	http.Handle("/chat", auth.MustAuth(&templateHandler{templDir: templDir, filename: "chat.html"}))
+	http.Handle("/login", &templateHandler{templDir: templDir, filename: "login.html"})
 
 	go r.Run()
 

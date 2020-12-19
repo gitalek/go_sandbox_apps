@@ -23,3 +23,11 @@ func (t *tracer) Trace(a ...interface{}) {
 	fmt.Fprint(t.out, a...)
 	fmt.Fprintln(t.out)
 }
+
+type nilTracer struct {}
+
+func Off() Tracer {
+	return &nilTracer{}
+}
+
+func (t *nilTracer) Trace(a ...interface{}) {}

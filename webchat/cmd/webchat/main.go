@@ -2,9 +2,12 @@ package main
 
 import (
 	"flag"
+	"github/gitalek/go_sandbox_apps/auth/pkg/auth"
+	"github/gitalek/go_sandbox_apps/trace/pkg/trace"
 	"github/gitalek/go_sandbox_apps/webchat/pkg/types"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sync"
 	"text/template"
@@ -38,14 +41,13 @@ func (t *templateHandler) pathToFile() string {
 func main() {
 	addr := flag.String("addr", ":9090", "The addr of the application")
 	flag.Parse()
-	//addr := fmt.Sprintf("%s:%d", host, port)
 	r := types.NewRoom()
-	//r.Tracer = trace.New(os.Stdout)
+	r.Tracer = trace.New(os.Stdout)
 
-	// root
-	http.Handle("/", &templateHandler{templDir: templDir, filename: "chat.html"})
 	// joining the room
 	http.Handle("/room", r)
+
+	http.Handle("/chat", auth.MustAuth(&templateHandler{templDir: templDir, filename: "chat.html"}))
 
 	go r.Run()
 

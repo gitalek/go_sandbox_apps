@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"go-sandbox-apps/webchat/pgk/types"
+	"github/gitalek/go_sandbox_apps/webchat/pkg/types"
 	"log"
 	"net/http"
 	"path/filepath"

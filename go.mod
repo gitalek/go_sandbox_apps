@@ -1,4 +1,4 @@
-module go-sandbox-apps
+module github/gitalek/go_sandbox_apps
 
 go 1.15
 

@@ -16,30 +16,45 @@
 <script  src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"> </script>
 <script>
     $(function(){
-        var socket = null;
-        var msgBox = $("#chatbox textarea");
-        var messages = $("#messages");
+        let socket;
+        const msgBox = $("#chatbox textarea");
+        const messages = $("#messages");
         $("#chatbox").submit(function(){
             if (!msgBox.val()) return false;
             if (!socket) {
                 alert("Error: There is no socket connection.");
                 return false;
             }
-            socket.send(msgBox.val());
+
+            const Message = msgBox.val();
+            const data = JSON.stringify({Message})
+            socket.send(data);
             msgBox.val("");
             return false;
         });
         if (!window["WebSocket"]) {
-            alert("Error: Your browser does not support web sockets.")
-            return
+            alert("Error: Your browser does not support web sockets.");
+            return;
         }
         socket = new WebSocket("ws://{{.Host}}/room");
         socket.onclose = function() {
             alert("Connection has been closed.");
         }
         socket.onmessage = function(e) {
-            messages.append($("<li>").text(e.data));
-        }
+            const msg = JSON.parse(e.data);
+
+            const d = new Date(msg.When);
+            const h = d.getHours();
+            const m = d.getMinutes() >= 10 ? d.getMinutes() : `0${d.getMinutes()}`;
+            const s = d.getSeconds() >= 10 ? d.getSeconds() : `0${d.getSeconds()}`;
+
+            messages.append(
+                $("<li>").append(
+                    $("<strong>").text(`[${h}:${m}:${s}] ${msg.Name}: `),
+                    $("<span>").text(msg.Message),
+                )
+            );
+        };
     });
 </script>
 </body>

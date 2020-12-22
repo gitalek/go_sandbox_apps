@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/stretchr/gomniauth"
 	"github.com/stretchr/gomniauth/providers/github"
+	"github.com/stretchr/objx"
 	"github/gitalek/go_sandbox_apps/auth/pkg/auth"
 	"github/gitalek/go_sandbox_apps/trace/pkg/trace"
 	"github/gitalek/go_sandbox_apps/webchat/pkg/types"
@@ -32,7 +33,13 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t.once.Do(func() {
 		t.templ = template.Must(template.ParseFiles(t.pathToFile()))
 	})
-	err := t.templ.Execute(w, r)
+	data := map[string]interface{}{
+		"Host": r.Host,
+	}
+	if authCookie, err := r.Cookie("auth"); err == nil {
+		data["UserData"] = objx.MustFromBase64(authCookie.Value)
+	}
+	err := t.templ.Execute(w, data)
 	if err != nil {
 		log.Printf("Error occured while executing template: %v", err)
 	}

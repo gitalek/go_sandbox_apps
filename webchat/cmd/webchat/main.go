@@ -2,13 +2,17 @@ package main
 
 import (
 	"flag"
+	"github.com/stretchr/gomniauth"
+	"github.com/stretchr/gomniauth/providers/github"
 	"github/gitalek/go_sandbox_apps/auth/pkg/auth"
 	"github/gitalek/go_sandbox_apps/trace/pkg/trace"
 	"github/gitalek/go_sandbox_apps/webchat/pkg/types"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"text/template"
 )
@@ -18,10 +22,10 @@ import (
 const templDir = "webchat/templates"
 
 type templateHandler struct {
-	once sync.Once
+	once     sync.Once
 	templDir string
 	filename string
-	templ *template.Template
+	templ    *template.Template
 }
 
 func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -41,6 +45,26 @@ func (t *templateHandler) pathToFile() string {
 func main() {
 	addr := flag.String("addr", ":9090", "The addr of the application")
 	flag.Parse()
+	ck, err := ioutil.ReadFile("temp/auth_key.txt")
+	if err != nil {
+		log.Fatalf("Can't get auth key: %v", err)
+	}
+	gomniauth.SetSecurityKey(string(ck))
+	keyGithub, err := ioutil.ReadFile("temp/github_key.txt")
+	if err != nil {
+		log.Fatalf("Can't get github key: %v", err)
+	}
+	secretGithub, err := ioutil.ReadFile("temp/github_secret.txt")
+	if err != nil {
+		log.Fatalf("Can't get github secret: %v", err)
+	}
+	gomniauth.WithProviders(
+		github.New(
+			strings.TrimRight(string(keyGithub), "\r\n"),
+			strings.TrimRight(string(secretGithub), "\r\n"),
+			"http://localhost:9090/auth/callback/github"),
+	)
+
 	r := types.NewRoom()
 	r.Tracer = trace.New(os.Stdout)
 

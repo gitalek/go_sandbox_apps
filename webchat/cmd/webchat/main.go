@@ -80,6 +80,16 @@ func main() {
 	http.Handle("/chat", auth.MustAuth(&templateHandler{templDir: templDir, filename: "chat.html"}))
 	http.Handle("/login", &templateHandler{templDir: templDir, filename: "login.html"})
 	http.HandleFunc("/auth/", auth.LoginHandler)
+	http.HandleFunc("/logout", func  (w http.ResponseWriter, r *http.Request) {
+	    http.SetCookie(w, &http.Cookie{
+	    	Name: "auth",
+	    	Value: "",
+	    	Path: "/",
+	    	MaxAge: -1,
+		})
+	    w.Header().Set("Location", "/chat")
+	    w.WriteHeader(http.StatusTemporaryRedirect)
+	})
 
 	go r.Run()
 

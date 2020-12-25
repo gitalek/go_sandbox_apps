@@ -18,8 +18,9 @@ func MustAuth(handler http.Handler) http.Handler {
 }
 
 func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	_, err := r.Cookie("auth")
-	if err == http.ErrNoCookie {
+	cookie, err := r.Cookie("auth")
+	// ? error handling
+	if err == http.ErrNoCookie || ((cookie != nil) && (cookie.Value == "")) {
 		// no authenticated
 		w.Header().Set("Location", "/login")
 		w.WriteHeader(http.StatusTemporaryRedirect)

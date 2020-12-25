@@ -72,7 +72,7 @@ func main() {
 			"http://localhost:9090/auth/callback/github"),
 	)
 
-	r := types.NewRoom()
+	r := types.NewRoom(types.UseGravatar)
 	r.Tracer = trace.New(os.Stdout)
 
 	// joining the room
